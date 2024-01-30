@@ -3,6 +3,7 @@ const bodyParser = require("body-parser")
 const CONFIG = require("./config/config")
 const authorRouter = require('./Routes/authors.routes')
 const bookRouter = require('./Routes/books.routes')
+const rateLimit = require("express-rate-limit")
 const {connectMongoDb} = require('./db/mongodb') 
 
 
@@ -11,6 +12,16 @@ const app = express()
 connectMongoDb()
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	standardHeaders: 'draft-7', // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+})
+
+// Apply the rate limiting middleware to all requests.
+app.use(limiter)
 
 app.use('/api/v1/authors', authorRouter)
 app.use('/api/v1/books', bookRouter)
