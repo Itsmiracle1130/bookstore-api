@@ -4,6 +4,7 @@ const CONFIG = require("./config/config")
 const authorRouter = require('./Routes/authors.routes')
 const bookRouter = require('./Routes/books.routes')
 const rateLimit = require("express-rate-limit")
+const helmet = require('helmet')
 const {connectMongoDb} = require('./db/mongodb') 
 
 
@@ -22,6 +23,9 @@ const limiter = rateLimit({
 
 // Apply the rate limiting middleware to all requests.
 app.use(limiter)
+
+//security middleware
+app.use(helmet())
 
 app.use('/api/v1/authors', authorRouter)
 app.use('/api/v1/books', bookRouter)
