@@ -1,7 +1,8 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const CONFIG = require("./config/config")
-const bookRouter = require('./Routes/books')
+const authorRouter = require('./Routes/authors.routes')
+const bookRouter = require('./Routes/books.routes')
 const {connectMongoDb} = require('./db/mongodb') 
 
 
@@ -11,6 +12,7 @@ connectMongoDb()
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+app.use('/api/v1/authors', authorRouter)
 app.use('/api/v1/books', bookRouter)
 
 
