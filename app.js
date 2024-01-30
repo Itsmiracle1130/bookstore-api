@@ -4,6 +4,8 @@ const CONFIG = require("./config/config")
 const authorRouter = require('./Routes/authors.routes')
 const bookRouter = require('./Routes/books.routes')
 const rateLimit = require("express-rate-limit")
+const logger = require('./logging/logger')
+const httpLogger = require('./logging/httpLogger')
 const helmet = require('helmet')
 const {connectMongoDb} = require('./db/mongodb') 
 
@@ -11,6 +13,7 @@ const {connectMongoDb} = require('./db/mongodb')
 
 const app = express()
 connectMongoDb()
+app.use(httpLogger)
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -37,7 +40,7 @@ app.get("/", (req, res) => {
 
 //error handler MW
 app.use((err, req, res, next) => {
-    console.log(err)
+    logger.error(err.message)
     const errorStatus = err.status || 500
     res.status(errorStatus).send(err.message)
 
@@ -45,5 +48,5 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(CONFIG.PORT, () => {
-    console.log(`Server is running on http://localhost:${CONFIG.PORT}`)
+    logger.info(`Server is running on http://localhost:${CONFIG.PORT}`)
 })
