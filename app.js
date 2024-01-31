@@ -4,10 +4,12 @@ const CONFIG = require("./config/config")
 const authorRouter = require('./Routes/authors.routes')
 const bookRouter = require('./Routes/books.routes')
 const rateLimit = require("express-rate-limit")
+const {requiresAuth} = require('express-openid-connect')
 const logger = require('./logging/logger')
 const httpLogger = require('./logging/httpLogger')
 const helmet = require('helmet')
 const {connectMongoDb} = require('./db/mongodb') 
+const auth0MW = require('./auth/auth0')
 
 
 
@@ -16,6 +18,9 @@ connectMongoDb()
 app.use(httpLogger)
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// auth router attaches /login, /logout, and /callback routes to the baseURL
+app.use(auth0MW)
 
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
@@ -30,8 +35,8 @@ app.use(limiter)
 //security middleware
 app.use(helmet())
 
-app.use('/api/v1/authors', authorRouter)
-app.use('/api/v1/books', bookRouter)
+app.use('/api/v1/authors', requiresAuth(), authorRouter)
+app.use('/api/v1/books', requiresAuth(), bookRouter)
 
 
 app.get("/", (req, res) => {
